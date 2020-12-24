@@ -1,4 +1,5 @@
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,14 @@ open class CardListItemAdapter(
         val model = list[position]
 
         if (holder is MyViewHolder) {
+
+            if(model.labelColor.isNotEmpty()){
+                holder.itemView.view_label_color.visibility = View.VISIBLE
+                holder.itemView.view_label_color
+                    .setBackgroundColor(Color.parseColor(model.labelColor))
+            }else{
+                holder.itemView.view_label_color.visibility = View.GONE
+            }
 
             holder.itemView.tv_card_name.text = model.name
 
