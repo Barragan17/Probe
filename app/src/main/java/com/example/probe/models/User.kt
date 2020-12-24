@@ -9,7 +9,8 @@ data class User (
     val email: String = "",
     val mobile: Long = 0,
     val image: String = "",
-    val fcmToken: String = ""
+    val fcmToken: String = "",
+    var selected: Boolean = false
     
 ): Parcelable {
     constructor(parcel: Parcel) : this(
@@ -18,7 +19,8 @@ data class User (
         parcel.readString()!!,
         parcel.readLong()!!,
         parcel.readString()!!,
-        parcel.readString()!!
+        parcel.readString()!!,
+        parcel.readBoolean()!!
     ) {
     }
 
@@ -29,6 +31,7 @@ data class User (
         writeLong(mobile)
         writeString(image)
         writeString(fcmToken)
+        writeBoolean(selected)
     }
 
     override fun describeContents(): Int {

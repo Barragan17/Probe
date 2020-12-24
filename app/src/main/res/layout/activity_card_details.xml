@@ -98,7 +98,7 @@
                     android:textSize="@dimen/card_details_label_text_size"/>
 
                 <TextView
-                    android:id="@+id/rv_select_members"
+                    android:id="@+id/tv_select_members"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/card_details_value_marginTop"
@@ -114,7 +114,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/card_details_value_marginTop"
                     android:visibility="gone"
-                    tools:visibility="gone"/>
+                    tools:visibility="visible"/>
 
                 <TextView
                     android:layout_width="match_parent"

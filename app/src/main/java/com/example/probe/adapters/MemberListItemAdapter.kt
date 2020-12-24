@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.probe.R
 import com.example.probe.models.User
+import com.example.probe.utils.Constants
 import kotlinx.android.synthetic.main.item_member.view.*
 
 open class MemberListItemAdapter(
@@ -43,11 +44,27 @@ open class MemberListItemAdapter(
 
             holder.itemView.tv_member_name.text = model.name
             holder.itemView.tv_member_email.text = model.email
+
+            if(model.selected){
+                holder.itemView.iv_selected_member.visibility = View.VISIBLE
+            }else{
+                holder.itemView.iv_selected_member.visibility = View.GONE
+            }
+
+            holder.itemView.setOnClickListener {
+                if(onClickListener != null){
+                    if(model.selected){
+                        onClickListener!!.onClick(position, model, Constants.UN_SELECT)
+                    }else{
+                        onClickListener!!.onClick(position, model, Constants.SELECT)
+                    }
+                }
+            }
         }
     }
 
     interface OnClickListener{
-        fun onClick(position: Int, model: User)
+        fun onClick(position: Int, user: User, action: String)
     }
 
     fun setOnClickListener(onClickListener: OnClickListener){
@@ -57,4 +74,5 @@ open class MemberListItemAdapter(
     private class MyViewHolder(view: View): RecyclerView.ViewHolder(view){
 
     }
+
 }
