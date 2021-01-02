@@ -223,6 +223,22 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <Button
+                android:id="@+id/btn_task_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/btn_marginStartEnd"
+                android:layout_marginEnd="@dimen/btn_marginStartEnd"
+                android:gravity="center"
+                android:background="@drawable/shape_button_rounded"
+                android:paddingTop="@dimen/btn_paddingTopBottom"
+                android:paddingBottom="@dimen/btn_paddingTopBottom"
+                android:text="@string/update"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/btn_text_size"
+                tools:visibility="visible"
+                android:visibility="gone"/>
             <TextView
                 android:id="@+id/tv_add_card"
                 android:layout_width="match_parent"
