@@ -4,7 +4,10 @@ import android.app.Activity
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.probe.R
 import com.example.probe.adapters.MemberListItemAdapter
@@ -15,6 +18,19 @@ import com.example.probe.utils.Constants
 import kotlinx.android.synthetic.main.activity_members.*
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.dialog_add_members.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
+import java.net.URL
 
 class MembersActivity : BaseActivity() {
 
@@ -104,5 +120,99 @@ class MembersActivity : BaseActivity() {
         anyChangeMade = true
 
         setupMemberList(mAssignedMembersList)
+
+        SendNotificationToUserAsyncTask(mBoardDetails.name, user.fcmToken).execute()
+    }
+
+    private inner class SendNotificationToUserAsyncTask(val boardName: String, val token: String) : ViewModel() {
+
+        fun execute() = viewModelScope.launch {
+            onPreExecute()
+            val result = doInBackground() // runs in background thread without blocking the Main Thread
+            onPostExecute(result)
+        }
+
+        private suspend fun doInBackground(): String = withContext(Dispatchers.IO) { // to run code in Background Thread
+            // do async work
+            var result : String
+            var connection: HttpURLConnection? = null
+            try {
+                val url = URL(Constants.FCM_BASE_URL)
+                connection = url.openConnection() as HttpURLConnection
+                connection.doOutput = true
+                connection.doInput = true
+                connection.instanceFollowRedirects = false
+                connection.requestMethod = "POST"
+
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("charset", "utf-8")
+                connection.setRequestProperty("Accept", "application/json")
+
+                connection.setRequestProperty(
+                    Constants.FCM_AUTHORIZATION, "${Constants.FCM_KEY}=${Constants.FCM_SERVER_KEY}"
+                )
+
+                connection.useCaches = false
+
+                val wr = DataOutputStream(connection.outputStream)
+                val jsonRequest = JSONObject()
+                val dataObject = JSONObject()
+                dataObject.put(Constants.FCM_KEY_TITLE, "Assigned to the board $boardName")
+                dataObject.put(Constants.FCM_KEY_MESSAGE, "You have been assigned to the board by ${mAssignedMembersList[0].name}")
+
+                jsonRequest.put(Constants.FCM_KEY_DATA, dataObject)
+                jsonRequest.put(Constants.FCM_KEY_TO, token)
+
+                wr.writeBytes(jsonRequest.toString())
+                wr.flush()
+                wr.close()
+
+                val httpResult: Int = connection.responseCode
+                if(httpResult == HttpURLConnection.HTTP_OK){
+                    val inputStream = connection.inputStream
+
+                    val reader = BufferedReader(InputStreamReader(inputStream))
+                    val sb = StringBuilder()
+                    var line: String?
+                    try {
+                        while(reader.readLine().also {line=it} != null){
+                            sb.append(line+"\n")
+                        }
+                    }catch (e: IOException){
+                        e.printStackTrace()
+                    }finally {
+                        try{
+                            inputStream.close()
+                        }catch (e: IOException){
+                            e.printStackTrace()
+                        }
+                    }
+                    result = sb.toString()
+                }else{
+                    result = connection.responseMessage
+                }
+            }catch (e: SocketTimeoutException){
+                result = "Connection TimeOut"
+            }catch (e: Exception){
+                result = "Error : " + e.message
+            }finally {
+                connection?.disconnect()
+            }
+             // simulate async work
+            return@withContext result
+        }
+
+        // Runs on the Main(UI) Thread
+        private fun onPreExecute() {
+            // show progress
+            showProgressDialog(resources.getString(R.string.please_wait))
+        }
+
+        // Runs on the Main(UI) Thread
+        private fun onPostExecute(result: String) {
+            // hide progress
+            hideProgressDialog()
+            Log.e("JSON Response Result", result)
+        }
     }
 }

@@ -60,7 +60,7 @@ class SignUpActivity : BaseActivity() {
                         val user = User(firebaseUser.uid, name, registeredEmail,phone)
 
                         FirestoreClass().registerUser(this, user)
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, SignInActivity::class.java))
                     }else{
                         Toast.makeText(this, task.exception!!.message, Toast.LENGTH_SHORT)
                             .show()
